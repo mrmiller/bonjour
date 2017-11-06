@@ -80,17 +80,27 @@ test('bonjour.find', function (bonjour, t) {
     browser.on('up', function (s) {
       if (s.name === 'Sub Foo') return
 
-      if (s.name === 'Foo Bar') {
-        t.equal(s.name, 'Foo Bar')
-        t.equal(s.fqdn, 'Foo Bar._test._tcp.local')
-        t.deepEqual(s.txt, {})
-        t.deepEqual(s.rawTxt, new Buffer('00', 'hex'))
-      } else {
-        t.equal(s.name, 'Baz')
-        t.equal(s.fqdn, 'Baz._test._tcp.local')
-        t.deepEqual(s.txt, { foo: 'bar' })
-        t.deepEqual(s.rawTxt, new Buffer('07666f6f3d626172', 'hex'))
+      switch (s.name) {
+        case 'Foo Bar':
+          t.equal(s.name, 'Foo Bar')
+          t.equal(s.fqdn, 'Foo Bar._test._tcp.local')
+          t.deepEqual(s.txt, {})
+          t.deepEqual(s.rawTxt, new Buffer('00', 'hex'))
+          break
+        case 'Baz':
+          t.equal(s.name, 'Baz')
+          t.equal(s.fqdn, 'Baz._test._tcp.local')
+          t.deepEqual(s.txt, { foo: 'bar' })
+          t.deepEqual(s.rawTxt, new Buffer('07666f6f3d626172', 'hex'))
+          break
+        case 'Got.Dots.In.Name':
+          t.equal(s.name, 'Got.Dots.In.Name')
+          t.equal(s.fqdn, 'Got.Dots.In.Name._test._tcp.local')
+          t.deepEqual(s.txt, { })
+          t.deepEqual(s.rawTxt, new Buffer('00', 'hex'))
+          break
       }
+
       t.equal(s.host, os.hostname())
       t.equal(s.port, 3000)
       t.equal(s.type, 'test')
@@ -117,6 +127,7 @@ test('bonjour.find', function (bonjour, t) {
   bonjour.publish({ name: 'Invalid', type: 'test2', port: 3000 }).on('up', next())
   bonjour.publish({ name: 'Sub Foo', type: 'test', subtypes: [ 'stOne', 'stTwo' ], port: 3000 }).on('up', next())
   bonjour.publish({ name: 'Baz', type: 'test', port: 3000, txt: { foo: 'bar' } }).on('up', next())
+  bonjour.publish({name: 'Got.Dots.In.Name', type: 'test', port: 3000}).on('up', next())
 })
 
 test('bonjour.find - all services', function (bonjour, t) {
